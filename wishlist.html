@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f7f5ef">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Your wishlist · Eumi</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Dancing+Script:wght@500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="account.css">
+    <link rel="stylesheet" href="product-detail.css">
+  </head>
+  <body data-page="wishlist">
+    <header class="header">
+      <nav class="nav" aria-label="Account navigation">
+        <a class="logo" href="index.html" aria-label="Eumi home">eumi</a>
+        <div class="nav-links">
+          <a href="index.html">Shop</a>
+          <a href="wishlist.html" aria-current="page">Wishlist</a>
+          <a href="my-orders.html">My orders</a>
+        </div>
+      </nav>
+    </header>
+    <main>
+      <a class="back-link" href="index.html">← Back to shop</a>
+      <span class="eyebrow">Saved for later</span>
+      <h1>Your wishlist <span id="wishlist-count"></span></h1>
+      <p class="intro">Your saved favorites on this browser.</p>
+      <p id="account-status" class="status" role="status" aria-live="polite"></p>
+      <div id="wishlist-grid" class="product-grid" aria-live="polite"></div>
+    </main>
+    <dialog class="product-detail-dialog" id="product-detail-dialog" aria-label="Product details"></dialog>
+    <script type="module" src="account.js"></script>
+  </body>
+</html>

@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f7f5ef">
+    <meta name="robots" content="noindex, nofollow">
+    <title>My orders · Eumi</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Dancing+Script:wght@500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="account.css">
+  </head>
+  <body data-page="orders">
+    <header class="header">
+      <nav class="nav" aria-label="Account navigation">
+        <a class="logo" href="index.html" aria-label="Eumi home">eumi</a>
+        <div class="nav-links">
+          <a href="index.html">Shop</a>
+          <a href="wishlist.html">Wishlist</a>
+          <a href="my-orders.html" aria-current="page">My orders</a>
+        </div>
+      </nav>
+    </header>
+    <main>
+      <a class="back-link" href="index.html">← Back to shop</a>
+      <span class="eyebrow">Your purchases</span>
+      <h1>My orders</h1>
+      <p class="intro">Order history saved on this browser.</p>
+      <p id="account-status" class="status" role="status" aria-live="polite"></p>
+      <div id="order-history-list" class="order-history-list" aria-live="polite"></div>
+    </main>
+    <script type="module" src="account.js"></script>
+  </body>
+</html>
