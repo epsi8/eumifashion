@@ -8,7 +8,7 @@ The storefront and admin dashboard use Supabase for product data and orders. Cus
 2. Open **SQL Editor**, paste in [`supabase/schema.sql`](./supabase/schema.sql), and run it.
 3. This creates the tables, row-level security policies, order RPC, realtime publication entries, and eight starter products.
 
-For an existing project, run the updated schema again to allow guest checkout, update the order RPC, add the product description column used by the product detail pages, and enable saved order images and status tracking. The schema backfills images for existing order items when their products are still present. New orders receive a private tracking token so their status can be refreshed on the customer's My Orders page without exposing order details.
+For an existing project, run the updated schema again to allow guest checkout, update the order RPC, add the product description column used by the product detail pages, enable saved order images and status tracking, and save clothing sizes with order items. New orders require a size for Women's Wear and Men's Wear products; Jewelry size is optional. The schema backfills images for existing order items when their products are still present. New orders receive a private tracking token so their status can be refreshed on the customer's My Orders page without exposing order details.
 The schema also creates a public `product-images` Storage bucket. Only admins can upload, replace, or delete files; storefront visitors can read images. Product photo uploads accept JPG, PNG, WebP, or GIF files up to 5 MB.
 
 To add just the product description column through **SQL Editor**, run:

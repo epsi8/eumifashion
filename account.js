@@ -20,7 +20,8 @@ function getSavedOrders() {
       item && typeof item.name === "string" &&
       Number.isFinite(Number(item.price)) &&
       Number.isInteger(item.quantity) && item.quantity > 0 &&
-      (item.image_url === undefined || typeof item.image_url === "string")
+      (item.image_url === undefined || typeof item.image_url === "string") &&
+      (item.size === undefined || item.size === null || typeof item.size === "string")
     )
   );
 }
@@ -39,7 +40,7 @@ function renderOrders() {
         <ul class="customer-order-items">${order.items.map(item => `
           <li class="customer-order-item">
             ${item.image_url ? `<img src="${escapeHtml(imageUrl(item.image_url, 180))}" alt="${escapeHtml(item.name)}">` : ""}
-            <span><strong>${escapeHtml(item.name)}</strong><br>Quantity: ${item.quantity} · ${money(Number(item.price) * item.quantity)}</span>
+            <span><strong>${escapeHtml(item.name)}</strong><br>Quantity: ${item.quantity}${item.size ? ` · Size: ${escapeHtml(item.size)}` : ""} · ${money(Number(item.price) * item.quantity)}</span>
           </li>`).join("")}</ul>
       </article>`).join("")
     : '<p class="empty-state">Your order history is empty.</p>';

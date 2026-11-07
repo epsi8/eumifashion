@@ -183,22 +183,33 @@ async function toggleWishlist(productId) {
   renderStoreState();
 }
 
+function getCheckoutItems() {
+  if (buyNowProduct) return [{ product: buyNowProduct, quantity: 1 }];
+  return [...cart].map(([id, quantity]) => ({
+    product: products.find(item => item.id === id),
+    quantity
+  })).filter(item => item.product);
+}
+
 async function openCheckout(product = null) {
   buyNowProduct = product;
   if (!orderRequestId) orderRequestId = crypto.randomUUID();
-  if (product) {
-    document.getElementById("checkout-summary").innerHTML =
-      `${escapeHtml(product.name)} × 1 — ${money(product.price)}<br><strong>Total: ${money(product.price)}</strong>`;
-  } else {
-    if (!cart.size) {
-      showToast("Your bag is empty.");
-      return;
-    }
-    const rows = products.filter(item => cart.has(item.id));
-    const total = rows.reduce((sum, item) => sum + Number(item.price) * cart.get(item.id), 0);
-    document.getElementById("checkout-summary").innerHTML =
-      `${rows.map(item => `${escapeHtml(item.name)} × ${cart.get(item.id)} — ${money(Number(item.price) * cart.get(item.id))}`).join("<br>")}<br><strong>Total: ${money(total)}</strong>`;
+  const items = getCheckoutItems();
+  if (!items.length) {
+    showToast("Your bag is empty.");
+    return;
   }
+  const total = items.reduce((sum, item) => sum + Number(item.product.price) * item.quantity, 0);
+  document.getElementById("checkout-summary").innerHTML =
+    `${items.map(({ product: item, quantity }) => `${escapeHtml(item.name)} × ${quantity} — ${money(Number(item.price) * quantity)}`).join("<br>")}<br><strong>Total: ${money(total)}</strong>`;
+  document.getElementById("checkout-item-sizes").innerHTML = items.map(({ product: item }, index) => {
+    const isClothing = ["Women's Wear", "Men's Wear"].includes(item.category);
+    const isJewelry = item.category === "Jewelry";
+    if (!isClothing && !isJewelry) return "";
+    const required = isClothing ? "required" : "";
+    const requirement = isClothing ? "required" : "optional";
+    return `<label>Size for ${escapeHtml(item.name)} (${requirement})<input name="item_size_${index}" type="text" maxlength="40" autocomplete="off" placeholder="e.g. S, 32, or Free size" ${required}></label>`;
+  }).join("");
   setCartOpen(false);
   elements.checkoutForm.hidden = false;
   elements.checkoutSuccess.hidden = true;
@@ -223,23 +234,15 @@ async function submitOrder(event) {
   const submitButton = form.querySelector('button[type="submit"]');
   submitButton.disabled = true;
   try {
-    const orderedItems = buyNowProduct
-      ? [{
-        name: buyNowProduct.name,
-        image_url: buyNowProduct.image_url,
-        price: Number(buyNowProduct.price),
-        quantity: 1
-      }]
-      : [...cart].map(([id, quantity]) => {
-        const product = products.find(item => item.id === id);
-        return product ? {
-          name: product.name,
-          image_url: product.image_url,
-          price: Number(product.price),
-          quantity
-        } : null;
-      }).filter(Boolean);
-    const { data: result, error } = await supabase.rpc("create_order", {
+    const checkoutItems = getCheckoutItems();
+    const orderedItems = checkoutItems.map(({ product, quantity }, index) => ({
+      name: product.name,
+      image_url: product.image_url,
+      price: Number(product.price),
+      quantity,
+      size: String(data.get(`item_size_${index}`) || "").trim() || null
+    }));
+    const { data: result, error } = await supabase.rpc("create_order_with_sizes", {
       p_full_name: String(data.get("full_name")).trim(),
       p_phone: String(data.get("phone")).trim(),
       p_address: String(data.get("address")).trim(),
@@ -248,9 +251,11 @@ async function submitOrder(event) {
       p_postal_code: String(data.get("postal_code")).trim(),
       p_customer_email: String(data.get("email")).trim(),
       p_request_id: orderRequestId,
-      p_items: buyNowProduct
-        ? [{ product_id: buyNowProduct.id, quantity: 1 }]
-        : [...cart].map(([product_id, quantity]) => ({ product_id, quantity }))
+      p_items: checkoutItems.map(({ product, quantity }, index) => ({
+        product_id: product.id,
+        quantity,
+        size: orderedItems[index].size
+      }))
     });
     if (error) throw error;
     const order = {

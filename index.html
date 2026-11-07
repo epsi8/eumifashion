@@ -88,6 +88,7 @@
       .checkout-heading h2 { margin: 0; font-family: var(--serif); font-size: 26px; font-weight: 500; }
       .checkout-summary { margin-bottom: 20px; padding: 12px; background: var(--paper); color: var(--muted); font-size: 11px; line-height: 1.8; }
       .checkout-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 13px; }
+      .checkout-item-sizes { display: grid; gap: 10px; }
       .checkout-form textarea { min-height: 75px; resize: vertical; }
       .checkout-form .button { width: 100%; }
       .checkout-form fieldset { grid-column: 1 / -1; margin: 0; border: 1px solid var(--line); padding: 10px; }
@@ -304,6 +305,7 @@
       </div>
       <div class="checkout-summary" id="checkout-summary"></div>
       <form class="checkout-form" id="checkout-form">
+        <div class="checkout-item-sizes wide" id="checkout-item-sizes"></div>
         <label>Full name<input name="full_name" required autocomplete="name" minlength="2" maxlength="100"></label>
         <label>Phone number<input name="phone" type="tel" required autocomplete="tel" minlength="7" maxlength="25"></label>
         <label class="wide">Email address<input name="email" type="email" required autocomplete="email" maxlength="254"></label>

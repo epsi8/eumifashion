@@ -205,12 +205,15 @@ create table if not exists public.order_items (
   product_id text references public.products (id) on delete set null,
   product_name text not null,
   image_url text,
+  size text check (size is null or char_length(btrim(size)) between 1 and 40),
   unit_price numeric(12, 2) not null check (unit_price > 0),
   quantity integer not null check (quantity between 1 and 99)
 );
 
 alter table public.order_items
   add column if not exists image_url text;
+alter table public.order_items
+  add column if not exists size text;
 update public.order_items
 set image_url = products.image_url
 from public.products
@@ -420,7 +423,6 @@ begin
   ) <> v_item_count then
     raise exception 'Your bag contains invalid product details.';
   end if;
-
   perform products.id
   from jsonb_array_elements(p_items) as item(value)
   join public.products on products.id = item.value ->> 'product_id' and products.is_active
@@ -486,7 +488,66 @@ end;
 $$;
 
 revoke all on function public.create_order(text, text, text, text, text, text, text, uuid, jsonb) from public;
-grant execute on function public.create_order(text, text, text, text, text, text, text, uuid, jsonb) to anon, authenticated;
+revoke execute on function public.create_order(text, text, text, text, text, text, text, uuid, jsonb) from anon, authenticated;
+
+create or replace function public.create_order_with_sizes(
+  p_full_name text,
+  p_phone text,
+  p_address text,
+  p_city text,
+  p_state text,
+  p_postal_code text,
+  p_customer_email text,
+  p_request_id uuid,
+  p_items jsonb
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_order jsonb;
+  v_order_id uuid;
+begin
+  if jsonb_typeof(p_items) is distinct from 'array' then
+    raise exception 'Your bag must contain a list of products.';
+  end if;
+  if exists (
+    select 1
+    from jsonb_array_elements(p_items) as item(value)
+    join public.products on products.id = item.value ->> 'product_id'
+    where products.category in ('Women''s Wear', 'Men''s Wear')
+      and nullif(btrim(item.value ->> 'size'), '') is null
+  ) then
+    raise exception 'Choose a size for every clothing item.';
+  end if;
+  if exists (
+    select 1
+    from jsonb_array_elements(p_items) as item(value)
+    where char_length(btrim(coalesce(item.value ->> 'size', ''))) > 40
+  ) then
+    raise exception 'Each size must be 40 characters or fewer.';
+  end if;
+
+  v_order := public.create_order(
+    p_full_name, p_phone, p_address, p_city, p_state,
+    p_postal_code, p_customer_email, p_request_id, p_items
+  );
+  v_order_id := (v_order ->> 'id')::uuid;
+
+  update public.order_items
+  set size = nullif(btrim(item.value ->> 'size'), '')
+  from jsonb_array_elements(p_items) as item(value)
+  where order_items.order_id = v_order_id
+    and order_items.product_id = item.value ->> 'product_id';
+
+  return v_order;
+end;
+$$;
+
+revoke all on function public.create_order_with_sizes(text, text, text, text, text, text, text, uuid, jsonb) from public;
+grant execute on function public.create_order_with_sizes(text, text, text, text, text, text, text, uuid, jsonb) to anon, authenticated;
 
 insert into public.products (id, name, category, price, description, tag, image_url)
 values

@@ -120,7 +120,7 @@ function renderOrders() {
           return `
             <li class="order-item">
               ${itemImage ? `<img src="${escapeHtml(imageUrl(itemImage, 180))}" alt="${escapeHtml(item.product_name)}">` : ""}
-              <span>${escapeHtml(item.product_name)} × ${Number(item.quantity)} — ${money(Number(item.unit_price) * Number(item.quantity))}</span>
+              <span>${escapeHtml(item.product_name)} × ${Number(item.quantity)}${item.size ? ` · Size: ${escapeHtml(item.size)}` : ""} — ${money(Number(item.unit_price) * Number(item.quantity))}</span>
             </li>`;
         }).join("")}</ul>
       </div>
@@ -159,7 +159,7 @@ function notifyNewOrders(newOrders) {
 
 async function loadOrders({ notifyNew = false } = {}) {
   const { data, error } = await supabase.from("orders")
-    .select("id,order_number,customer_email,full_name,phone,address,city,state,postal_code,payment_method,status,total,created_at,order_items(product_id,product_name,image_url,unit_price,quantity)")
+    .select("id,order_number,customer_email,full_name,phone,address,city,state,postal_code,payment_method,status,total,created_at,order_items(product_id,product_name,image_url,unit_price,quantity,size)")
     .order("created_at", { ascending: false });
   if (error) throw error;
   orders = data || [];
